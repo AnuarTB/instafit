@@ -16,6 +16,7 @@ import UploadZone from './components/UploadZone';
 import GridItem from './components/GridItem';
 import Lightbox from './components/Lightbox';
 import CropPreview from './components/CropPreview';
+import CropModal from './components/CropModal';
 
 export default function App() {
   const [photos, setPhotos] = useState([]);
@@ -23,6 +24,7 @@ export default function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [dark, setDark] = useState(true);
   const [page, setPage] = useState('grid'); // 'grid' | 'crop'
+  const [cropTarget, setCropTarget] = useState(null);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
@@ -193,6 +195,7 @@ export default function App() {
                   {photos.map((photo) => (
                     <div key={photo.id} className="relative group">
                       <GridItem photo={photo} onOpen={handleOpen} />
+                      {/* Delete */}
                       <button
                         className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 text-white rounded-full text-xs leading-none items-center justify-center hidden group-hover:flex hover:bg-black/80 transition-colors z-10"
                         onClick={(e) => { e.stopPropagation(); handleRemove(photo.id); }}
@@ -214,7 +217,24 @@ export default function App() {
       </main>
 
       {page === 'grid' && lightboxPhoto && (
-        <Lightbox photo={lightboxPhoto} onClose={() => setLightboxPhoto(null)} />
+        <Lightbox
+          photo={lightboxPhoto}
+          onClose={() => setLightboxPhoto(null)}
+          onCrop={() => { setCropTarget(lightboxPhoto); setLightboxPhoto(null); }}
+        />
+      )}
+
+      {cropTarget && (
+        <CropModal
+          photo={cropTarget}
+          onClose={() => setCropTarget(null)}
+          onApply={(croppedUrl) => {
+            setPhotos((prev) =>
+              prev.map((p) => p.id === cropTarget.id ? { ...p, url: croppedUrl } : p)
+            );
+            setCropTarget(null);
+          }}
+        />
       )}
     </div>
   );
