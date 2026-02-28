@@ -30,6 +30,7 @@ function getCroppedDataUrl(imageUrl, offset, isWider, fitsExactly) {
 }
 
 export default function CropModal({ photo, onApply, onClose }) {
+  const sourceUrl = photo.originalUrl ?? photo.url;
   const [offset, setOffset] = useState(0.5);
   const [naturalSize, setNaturalSize] = useState(null);
   const [displaySize, setDisplaySize] = useState({ w: 0, h: 0 });
@@ -89,7 +90,7 @@ export default function CropModal({ photo, onApply, onClose }) {
   };
 
   const handleApply = async () => {
-    const croppedUrl = await getCroppedDataUrl(photo.url, offset, isWider, fitsExactly);
+    const croppedUrl = await getCroppedDataUrl(sourceUrl, offset, isWider, fitsExactly);
     onApply(croppedUrl);
   };
 
@@ -121,7 +122,7 @@ export default function CropModal({ photo, onApply, onClose }) {
           >
             <img
               ref={imgRef}
-              src={photo.url}
+              src={sourceUrl}
               className="w-full h-auto block"
               draggable={false}
               onLoad={(e) => {

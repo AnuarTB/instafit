@@ -70,7 +70,7 @@ export default function App() {
           new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (ev) =>
-              resolve({ id: crypto.randomUUID(), url: ev.target.result, name: file.name });
+              resolve({ id: crypto.randomUUID(), url: ev.target.result, originalUrl: ev.target.result, name: file.name });
             reader.readAsDataURL(file);
           })
       );
@@ -231,7 +231,7 @@ export default function App() {
           onApply={(croppedUrl) => {
             setPhotos((prev) =>
               prev.map((p) => p.id === cropTarget.id ? { ...p, url: croppedUrl } : p)
-            );
+            );  // originalUrl is intentionally preserved
             setCropTarget(null);
           }}
         />

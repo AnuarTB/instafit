@@ -13,7 +13,7 @@ export default function UploadZone({ onUpload }) {
         new Promise((resolve) => {
           const reader = new FileReader();
           reader.onload = (e) =>
-            resolve({ id: crypto.randomUUID(), url: e.target.result, name: file.name });
+            resolve({ id: crypto.randomUUID(), url: e.target.result, originalUrl: e.target.result, name: file.name });
           reader.readAsDataURL(file);
         })
     );
