@@ -1,15 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 
-const TARGET_RATIO = 4 / 5;
-const SQRT41 = Math.sqrt(41);
+const RATIOS = [
+  { label: '1:1',  value: 1 },
+  { label: '4:5',  value: 4 / 5 },
+  { label: '3:4',  value: 3 / 4 },
+  { label: '16:9', value: 16 / 9 },
+];
 
-function initCrop(natW, natH) {
+function initCrop(natW, natH, ratio) {
   const R = natW / natH;
-  if (R > TARGET_RATIO) {
-    const w = natH * TARGET_RATIO;
+  if (R > ratio) {
+    const w = natH * ratio;
     return { x: (natW - w) / 2, y: 0, w };
   }
-  const h = natW / TARGET_RATIO;
+  const h = natW / ratio;
   return { x: 0, y: (natH - h) / 2, w: natW };
 }
 
@@ -20,7 +24,28 @@ const CORNERS = [
   { signX:  1, signY:  1, pos: '-bottom-[5px] -right-[5px]',cursor: 'se-resize' },
 ];
 
+function RatioSelector({ ratio, onChange }) {
+  return (
+    <div className="flex gap-1.5 mb-4">
+      {RATIOS.map(({ label, value }) => (
+        <button
+          key={label}
+          onClick={() => onChange(value)}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
+            ratio === value
+              ? 'bg-[#0095f6] border-[#0095f6] text-white'
+              : 'border-gray-300 dark:border-neutral-700 text-gray-600 dark:text-neutral-400 hover:border-gray-400 dark:hover:border-neutral-500'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function CustomCropEditor({ url }) {
+  const [ratio, setRatio] = useState(4 / 5);
   const [crop, setCrop] = useState(null);
   const [naturalSize, setNaturalSize] = useState(null);
   const [displaySize, setDisplaySize] = useState({ w: 0, h: 0 });
@@ -34,12 +59,19 @@ export default function CustomCropEditor({ url }) {
     return () => ro.disconnect();
   }, [naturalSize]);
 
+  // Re-init crop when ratio changes
+  useEffect(() => {
+    if (!naturalSize) return;
+    setCrop(initCrop(naturalSize.w, naturalSize.h, ratio));
+  }, [ratio, naturalSize]);
+
   const scale = naturalSize && displaySize.w > 0 ? displaySize.w / naturalSize.w : 1;
+  const sqrtDiag = Math.sqrt(ratio * ratio + 1);
   const dc = crop ? {
     x: crop.x * scale,
     y: crop.y * scale,
     w: crop.w * scale,
-    h: crop.w * 5 / 4 * scale,
+    h: (crop.w / ratio) * scale,
   } : null;
 
   const startPan = (e) => {
@@ -48,7 +80,7 @@ export default function CustomCropEditor({ url }) {
     e.stopPropagation();
     const sx = e.clientX, sy = e.clientY;
     const sc = { ...crop };
-    const h = sc.w * 5 / 4;
+    const h = sc.w / ratio;
     const onMove = (ev) => setCrop({
       w: sc.w,
       x: Math.max(0, Math.min(naturalSize.w - sc.w, sc.x + (ev.clientX - sx) / scale)),
@@ -66,14 +98,14 @@ export default function CustomCropEditor({ url }) {
     if (!crop || !naturalSize) return;
     e.preventDefault();
     e.stopPropagation();
-    const h = crop.w * 5 / 4;
+    const h = crop.w / ratio;
     const anchor = {
       x: signX > 0 ? crop.x          : crop.x + crop.w,
       y: signY > 0 ? crop.y          : crop.y + h,
     };
     const maxW = Math.min(
       signX > 0 ? naturalSize.w - anchor.x : anchor.x,
-      (signY > 0 ? naturalSize.h - anchor.y : anchor.y) * TARGET_RATIO,
+      (signY > 0 ? naturalSize.h - anchor.y : anchor.y) * ratio,
     );
     const minW = naturalSize.w * 0.1;
 
@@ -83,9 +115,9 @@ export default function CustomCropEditor({ url }) {
       const my = (ev.clientY - rect.top)  / scale;
       const dx = (mx - anchor.x) * signX;
       const dy = (my - anchor.y) * signY;
-      const proj = (dx * 4 + dy * 5) / SQRT41;
-      const newW = Math.max(minW, Math.min(proj * 4 / SQRT41, maxW));
-      const newH = newW * 5 / 4;
+      const proj = (dx * ratio + dy) / sqrtDiag;
+      const newW = Math.max(minW, Math.min(proj * ratio / sqrtDiag, maxW));
+      const newH = newW / ratio;
       setCrop({
         w: newW,
         x: signX > 0 ? anchor.x : anchor.x - newW,
@@ -105,7 +137,7 @@ export default function CustomCropEditor({ url }) {
     const img = new Image();
     img.onload = () => {
       const { x, y, w } = crop;
-      const h = w * 5 / 4;
+      const h = w / ratio;
       const canvas = document.createElement('canvas');
       canvas.width = Math.round(w);
       canvas.height = Math.round(h);
@@ -124,7 +156,7 @@ export default function CustomCropEditor({ url }) {
         <div>
           <h3 className="text-base font-semibold text-gray-900 dark:text-white">Custom crop</h3>
           <p className="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
-            Drag to move · Drag corners to resize (4:5 locked)
+            Drag to move · Drag corners to resize
           </p>
         </div>
         <button
@@ -140,6 +172,8 @@ export default function CustomCropEditor({ url }) {
       </div>
 
       <div className="max-w-sm mx-auto">
+        <RatioSelector ratio={ratio} onChange={setRatio} />
+
         <div className="relative overflow-hidden rounded-lg select-none">
           <img
             ref={imgRef}
@@ -150,7 +184,6 @@ export default function CustomCropEditor({ url }) {
               const natW = e.target.naturalWidth, natH = e.target.naturalHeight;
               setNaturalSize({ w: natW, h: natH });
               setDisplaySize({ w: e.target.offsetWidth, h: e.target.offsetHeight });
-              setCrop(initCrop(natW, natH));
             }}
           />
 
@@ -174,7 +207,7 @@ export default function CustomCropEditor({ url }) {
                 <div className="absolute left-2/3 top-0 bottom-0 border-l border-white" />
               </div>
 
-              {/* Move hint icon */}
+              {/* Move hint */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="bg-black/30 rounded-full p-1.5">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
