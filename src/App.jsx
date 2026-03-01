@@ -17,6 +17,7 @@ import GridItem from './components/GridItem';
 import Lightbox from './components/Lightbox';
 import CropPreview from './components/CropPreview';
 import CropModal from './components/CropModal';
+import FrameModal from './components/FrameModal';
 
 export default function App() {
   const [photos, setPhotos] = useState([]);
@@ -25,6 +26,7 @@ export default function App() {
   const [dark, setDark] = useState(true);
   const [page, setPage] = useState('grid'); // 'grid' | 'crop'
   const [cropTarget, setCropTarget] = useState(null);
+  const [frameTarget, setFrameTarget] = useState(null);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
@@ -221,6 +223,20 @@ export default function App() {
           photo={lightboxPhoto}
           onClose={() => setLightboxPhoto(null)}
           onCrop={() => { setCropTarget(lightboxPhoto); setLightboxPhoto(null); }}
+          onFrame={() => { setFrameTarget(lightboxPhoto); setLightboxPhoto(null); }}
+        />
+      )}
+
+      {frameTarget && (
+        <FrameModal
+          photo={frameTarget}
+          onClose={() => setFrameTarget(null)}
+          onApply={(framedUrl) => {
+            setPhotos((prev) =>
+              prev.map((p) => p.id === frameTarget.id ? { ...p, url: framedUrl } : p)
+            );
+            setFrameTarget(null);
+          }}
         />
       )}
 
