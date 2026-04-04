@@ -129,7 +129,7 @@ export default function CropPreview() {
       {/* Preset crop previews */}
       {imageUrl && (
         <>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {CROPS.map(({ label, positionClass, yFactor }) => (
               <CropCard key={label} label={label} positionClass={positionClass} yFactor={yFactor} url={imageUrl} />
             ))}

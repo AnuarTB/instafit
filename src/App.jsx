@@ -101,7 +101,7 @@ export default function App() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
-              Grid
+              <span className="hidden sm:inline">Grid</span>
             </button>
             <button
               onClick={() => setPage('crop')}
@@ -114,7 +114,7 @@ export default function App() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M4 16l4-4m0 0l4-4m-4 4h12M8 8H4m16 8l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              Crop
+              <span className="hidden sm:inline">Crop</span>
             </button>
           </div>
 
@@ -141,11 +141,11 @@ export default function App() {
             </button>
 
             {/* Add photos */}
-            <label className="flex items-center gap-2 bg-[#0095f6] text-white text-sm font-semibold px-4 py-1.5 rounded-lg cursor-pointer hover:bg-[#1877f2] transition-colors">
+            <label className="flex items-center gap-2 bg-[#0095f6] text-white text-sm font-semibold px-3 sm:px-4 py-1.5 rounded-lg cursor-pointer hover:bg-[#1877f2] transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Add photos
+              <span className="hidden sm:inline">Add photos</span>
               <input
                 type="file"
                 accept="image/*"
@@ -165,8 +165,8 @@ export default function App() {
 
       <main className={`max-w-[935px] mx-auto px-4 py-6 ${page !== 'grid' ? 'hidden' : ''}`}>
         {/* Profile stub */}
-        <div className="flex items-center gap-8 mb-8 pb-6 border-b border-gray-200 dark:border-neutral-800 transition-colors duration-200">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex-shrink-0 flex items-center justify-center">
+        <div className="flex items-center gap-4 sm:gap-8 mb-8 pb-6 border-b border-gray-200 dark:border-neutral-800 transition-colors duration-200">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex-shrink-0 flex items-center justify-center">
             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
             </svg>
@@ -199,7 +199,7 @@ export default function App() {
                       <GridItem photo={photo} onOpen={handleOpen} />
                       {/* Delete */}
                       <button
-                        className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 text-white rounded-full text-xs leading-none items-center justify-center hidden group-hover:flex hover:bg-black/80 transition-colors z-10"
+                        className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 text-white rounded-full text-xs leading-none items-center justify-center flex sm:hidden sm:group-hover:flex hover:bg-black/80 transition-colors z-10"
                         onClick={(e) => { e.stopPropagation(); handleRemove(photo.id); }}
                         aria-label="Remove photo"
                       >
